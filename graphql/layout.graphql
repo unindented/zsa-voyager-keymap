@@ -1,0 +1,9 @@
+query ($hashId: String!, $geometry: String, $revisionId: String!) {
+  layout(hashId: $hashId, geometry: $geometry, revisionId: $revisionId) {
+    revision {
+      qmkVersion
+      hashId
+      title
+    }
+  }
+}

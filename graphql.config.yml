@@ -1,0 +1,2 @@
+schema: "https://oryx.zsa.io/graphql"
+documents: "src/**/*.graphql"
