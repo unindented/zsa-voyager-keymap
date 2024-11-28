@@ -1,0 +1,61 @@
+name: Build
+
+on:
+  push:
+    branches-ignore:
+      - "!*-oryx"
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: "${{ github.ref }}"
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Configure account
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Build
+        run: make all
+
+      - name: Commit and push
+        run: make commit-build-dir
+
+      - name: Echo environment data
+        id: env
+        run: make -s echo-env | while IFS= read -r line; do echo "$line" >> "$GITHUB_OUTPUT"; done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{ steps.env.outputs.my_keyboard }}_${{ steps.env.outputs.rev_meta_title }}"
+          compression-level: 9
+          path: |
+            build/keyboard.json
+            build/keymap.bin
+            build/keymap.json
+            build/keymap.yml
+            build/keymap.svg
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.env.outputs.timestamp }}" \
+            --target "${{ github.ref }}"
+            --title "${{ steps.env.outputs.my_keyboard }} ${{ steps.env.outputs.rev_meta_title }} (${{ steps.env.outputs.timestamp }})" \
+            --generate-notes
+          gh release upload "${{ steps.env.outputs.timestamp }}" \
+            build/keymap.bin \
+            build/keymap.svg

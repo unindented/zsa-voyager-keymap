@@ -1,0 +1,36 @@
+name: Update from Oryx
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-from-oryx:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: "${{ github.ref }}-oryx"
+          fetch-depth: 0
+
+      - name: Configure account
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Download latest source
+        run: make --always-make all
+
+      - name: Commit and push
+        run: make commit-source-dir
+
+      - name: Merge and push
+        run: make merge-into-build
+
+  build:
+    needs: update-from-oryx
+    uses: ./.github/workflows/build.yml

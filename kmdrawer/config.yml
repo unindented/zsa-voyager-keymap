@@ -1,0 +1,6 @@
+draw_config:
+  key_w: 80.0
+  key_h: 76.0
+  dark_mode: true
+  draw_key_sides: true
+  footer_text: ''
