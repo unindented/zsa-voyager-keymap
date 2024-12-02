@@ -26,20 +26,31 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Build
-        run: make all
+      # - name: Build
+      #   run: make all
 
-      - name: Commit and push
-        run: make commit-build-dir
+      # - name: Commit and push
+      #   run: make commit-build-dir
+
+      - name: Set color
+        id: color-selector
+        run: echo "SELECTED_COLOR=green" >> "$GITHUB_OUTPUT"
+      - name: Get color
+        env:
+          SELECTED_COLOR: ${{ steps.color-selector.outputs.SELECTED_COLOR }}
+        run: echo "The selected color is $SELECTED_COLOR or ${{ steps.color-selector.outputs.SELECTED_COLOR }}"
 
       - name: Echo environment data
         id: env
-        run: make -s echo-env | while IFS= read -r line; do echo "$line" >> "$GITHUB_OUTPUT"; done
+        run: |
+          # make -s echo-env | while IFS= read -r line; do echo "$line" >> "$GITHUB_OUTPUT"; done
+          echo "my_keyboard = foo" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: "${{ steps.env.outputs.my_keyboard }}_${{ steps.env.outputs.rev_meta_title }}"
+          name: ${{ steps.env.outputs.my_keyboard }}_${{ steps.env.outputs.rev_meta_title }}
           compression-level: 9
           path: |
             build/keyboard.json
